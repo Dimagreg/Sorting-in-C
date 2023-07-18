@@ -10,7 +10,7 @@
  *   -v
  *   -g, --generate <filename_original> <filename_shuffled> <line_count>
  *              filename_original and filename_shuffled - non_space string 1....128
- *              line_count - unsigned int 1....2^21
+ *              line_count - unsigned int 1....N
  *
  *   -s, --sort <file_shuffled> <filename_result>
  *          file_shuffled and filename_result - non_space string 1....128
@@ -36,7 +36,7 @@ enum
 
 /* Program version. */
 
-char *VERSION = "17-Jul-23";
+char *VERSION = "18-Jul-23";
 
 /* Original file of elements which are then shuffled. */
 
@@ -359,7 +359,7 @@ main (int argc, char* argv[])
     else if (argc == 5 && (strcmp (argv[1], "--generate") == 0
              || strcmp (argv[1], "-g") == 0)
             && strlen (argv[2]) < 128 && strlen (argv[3]) < 128
-            && strtol (argv[4], NULL, 10) > 1 && strtol (argv[4], NULL, 10) < 2097152 )
+            && strtol (argv[4], NULL, 10) >= 2)
     {
         /* -generate option */
 
