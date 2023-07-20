@@ -49,6 +49,14 @@ enum
 
 char *VERSION = "20-Jul-23";
 
+/* Array of unsorted input file numbers. */
+
+long *file_numbers_array = NULL;
+
+/* The total number of elements in array. */
+
+long file_numbers_array_count = 0;
+
 /* Original file of elements which are then shuffled. */
 
 static FILE *file_original;
@@ -68,7 +76,7 @@ static unsigned long long mem_available_kB;
 /* Free's allocated memory and exits with code. */
 
 static void
-my_exit (int code, long *file_numbers_array)
+my_exit (int code)
 {
     if (file_numbers_array)
         free (file_numbers_array);
@@ -297,7 +305,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
     {
         my_print_error ("Can't allocate memory to file_numbers_array", "");
 
-        my_exit (-1, NULL);
+        my_exit (-1);
     }
 
     while (fscanf (file_shuffled, "%ld", &file_numbers_array[file_numbers_array_count]) == 1)
@@ -311,7 +319,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
         {
             my_print_error ("Can't reallocate memory to file_numbers_array", "");
 
-            my_exit (-1, NULL);
+            my_exit (-1);
         }
     }
 
@@ -343,7 +351,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
     {
         my_print_error ("Error on insertion sort.", "");
 
-        my_exit(-1, file_numbers_array);
+        my_exit(-1);
     }
 
     clock_t timeEnd = clock ();
@@ -406,14 +414,6 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
 int
 main (int argc, char* argv[])
 {
-    /* Array of unsorted input file numbers. */
-
-    long *file_numbers_array = NULL;
-
-    /* The total number of elements in array. */
-
-    long file_numbers_array_count = 0;
-
     /* Get system available memory */
 
     if (DEBUG)
@@ -422,7 +422,7 @@ main (int argc, char* argv[])
     mem_available_kB = my_get_system_available_memory_kB ();
 
     if (mem_available_kB == 0)
-        my_exit (-1, file_numbers_array);
+        my_exit (-1);
 
     if (DEBUG)
         printf ("DEBUG: MemAvailable: %llu kB\n", mem_available_kB);
@@ -451,7 +451,7 @@ main (int argc, char* argv[])
 
         my_print_help (argv[1]);
 
-        my_exit (0, file_numbers_array);
+        my_exit (0);
     }
     else if (argc == 5 && (strcmp (argv[1], "--generate") == 0
              || strcmp (argv[1], "-g") == 0)
@@ -480,15 +480,15 @@ main (int argc, char* argv[])
 
             my_print_error (str, "");
 
-            my_exit (-1, file_numbers_array);
+            my_exit (-1);
         }
 
         if (my_generate_input_files (argv[2], argv[3], line_count, file_numbers_array) == 0)
         {
-            my_exit (-1, file_numbers_array);
+            my_exit (-1);
         }
 
-        my_exit (0, file_numbers_array);
+        my_exit (0);
     }
     else if (argc == 4 && (strcmp (argv[1], "--sort") == 0
              || strcmp (argv[1], "-s") == 0)
@@ -498,10 +498,10 @@ main (int argc, char* argv[])
 
         if (my_sort_file (argv[2], argv[3], file_numbers_array, file_numbers_array_count) == 0)
         {
-            my_exit (-1, file_numbers_array);
+            my_exit (-1);
         }
 
-        my_exit (0, file_numbers_array);
+        my_exit (0);
     }
     else
     {
@@ -509,7 +509,7 @@ main (int argc, char* argv[])
 
         my_print_help ("");
 
-        my_exit (0, file_numbers_array);
+        my_exit (0);
     }
 
     return 0;
