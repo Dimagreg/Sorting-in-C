@@ -1,7 +1,17 @@
 /*
- * TODO: calculate ram/disk memory required for a maximum write capacity. throw error if request is more than it.
+ * TODO: separate sorting process in 3 different function - read, sort, write
+ *       when reading sort check for number
  *       calculate estimate time of computing
  *       progress bar?
+ *       parallel sorting:
+ *       basically for 500 random values in a file separate it to 1..10 parallel processes
+ *       where for example if chooses 5 it will create 5 different arrays of equal interval of
+ *       values - each array is a struct that contains: array of elements, count, int_min, int_max,
+ *       order. int_min and int_max will be subjected for each array. Ideally we will have 100
+ *       elements per array. If not we will neglect if the number is between 60..120. If it is more
+ *       then we will create 2 more arrays of equal intervals of int_min and int_max. If it is less,
+ *       then compress 2 into one. If the number of elements is 0 - delete array. After that
+ *       compress all the arrays into one respecting the order of intervals.
  */
 
 /*
@@ -10,7 +20,7 @@
  *   -v
  *   -g, --generate <filename_original> <filename_shuffled> <line_count>
  *              filename_original and filename_shuffled - non_space string 1....128
- *              line_count - unsigned int 1....N
+ *              line_count - 2....2,147,483,647 (max long value)
  *
  *   -s, --sort <file_shuffled> <filename_result>
  *          file_shuffled and filename_result - non_space string 1....128
@@ -25,18 +35,19 @@
 #include "lib/my_print.h"
 #include "lib/my_sort.h"
 #include "lib/my_memory.h"
+#include "lib/my_complexity_calc.h"
 
 /* Debugging option. 1 for TRUE, 0 for FALSE. */
 
 enum
 {
-    DEBUG = 0,
+    DEBUG = 1,
     STATS = 1
 };
 
 /* Program version. */
 
-char *VERSION = "18-Jul-23";
+char *VERSION = "20-Jul-23";
 
 /* Original file of elements which are then shuffled. */
 
@@ -50,18 +61,6 @@ static FILE *file_shuffled;
 
 static FILE *file_sorted;
 
-/* Array of unsorted input file numbers. */
-
-static unsigned int *file_numbers_array = NULL;
-
-/* The total number of elements in array. */
-
-static int file_numbers_array_count = 0;
-
-/* Execution time for reading from file, sorting, writing to file. */
-
-//static int exec_time_read, exec_time_sort, exec_time_write;
-
 /* System available memory in kB */
 
 static unsigned long long mem_available_kB;
@@ -69,7 +68,7 @@ static unsigned long long mem_available_kB;
 /* Free's allocated memory and exits with code. */
 
 static void
-my_exit (int code)
+my_exit (int code, long *file_numbers_array)
 {
     if (file_numbers_array)
         free (file_numbers_array);
@@ -84,19 +83,19 @@ my_exit (int code)
         fclose (file_sorted);
 
     if (DEBUG)
-        printf("EXIT CODE %d\n", code);
+        printf ("EXIT CODE %d\n", code);
 
     exit (code);
 }
 
 /* Counts the number of consecutive array elements. */
 
-static int
-my_count_consecutive_array (const int *arr, int n)
+static long
+my_count_consecutive_array (const long *arr, long n)
 {
-    int count = 0;
+    long count = 0;
 
-    int i;
+    long i;
     for (i = 0; i < (n - 1); i ++)
     {
         if ((arr[i + 1] - arr[i]) == 1)
@@ -111,20 +110,33 @@ my_count_consecutive_array (const int *arr, int n)
  * on lines_number. Returns 1 on success. */
 
 static int
-my_generate_input_files (char *file_original_path, char *file_shuffled_path, int lines_number)
+my_generate_input_files (char *file_original_path, char *file_shuffled_path,
+                         long lines_count, long *file_numbers_array)
 {
-    int numbers_arr[lines_number];
-    int i;
-
-    srand (time (NULL));
-
     if (DEBUG)
     {
-        printf("DEBUG: my_generate_input_files arguments - %s, %s, %d\n",
-               file_original_path, file_shuffled_path, lines_number);
+        printf ("DEBUG: Called my_generate_input_files with arguments: \n");
+        printf ("DEBUG: file_original_path = %s\n", file_original_path);
+        printf ("DEBUG: file_shuffled_path = %s\n", file_shuffled_path);
+        printf ("DEBUG: lines_count = %ld\n", lines_count);
+    }
+
+    long i;
+
+    file_numbers_array = malloc ((lines_count + 1) * sizeof (long));
+    if (file_numbers_array == NULL)
+    {
+        my_print_error ("Can't allocate memory to file_numbers_array", "");
+
+        return 0;
     }
 
     /* Access to file_original. */
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: Accessing file_original...\n");
+    }
 
     if (access (file_original_path, F_OK) == 0)
     {
@@ -146,6 +158,11 @@ my_generate_input_files (char *file_original_path, char *file_shuffled_path, int
 
     /* Access to file_shuffled. */
 
+    if (DEBUG)
+    {
+        printf ("DEBUG: Accessing file_shuffled...\n");
+    }
+
     if (access (file_shuffled_path, F_OK) == 0)
     {
         my_print_error ("This file exists", file_shuffled_path);
@@ -164,62 +181,59 @@ my_generate_input_files (char *file_original_path, char *file_shuffled_path, int
         }
     }
 
-    /* Writing the standard values to file_original */
+    /* Writing the standard numbers to file_original */
 
-    for (i = 0; i < lines_number; i++)
+    if (DEBUG)
     {
-        numbers_arr[i] = i;
+        printf ("DEBUG: Writing the standard numbers to file_original...\n");
     }
 
-    for (i = 0; i < lines_number; i++)
+    for (i = 0; i < lines_count; i++)
     {
-        if (DEBUG)
-            printf("DEBUG: Print to file_original: %d\n", numbers_arr[i]);
-
-        fprintf (file_original, "%d\n", numbers_arr[i]);
+        file_numbers_array[i] = i;
     }
 
-    /* Randomly shuffle elements of array. */
-
-    int random_i, temp;
-
-    for (i = 0; i < lines_number; i++)
+    for (i = 0; i < lines_count; i++)
     {
-        do {
-            random_i = rand() % lines_number;
-
-        } while (random_i == i); /* Indices should be different in order to shuffle. */
-
-        temp = numbers_arr[i];
-
-        numbers_arr[i] = numbers_arr[random_i];
-
-        numbers_arr[random_i] = temp;
+        fprintf (file_original, "%ld\n", file_numbers_array[i]);
     }
 
-    for (i = 0; i < lines_number; i++)
-    {
-        if (DEBUG)
-            printf("DEBUG: Print to file_shuffled: %d\n", numbers_arr[i]);
+    /* Randomly shuffle numbers of array. */
 
-        fprintf (file_shuffled, "%d\n", numbers_arr[i]);
+    if (DEBUG)
+        printf ("DEBUG: Randomly shuffling numbers of array...\n");
+
+    my_shuffle_array (file_numbers_array, lines_count);
+
+    if (DEBUG)
+        printf ("DEBUG: Writing the shuffled numbers to file_shuffled...\n");
+
+    for (i = 0; i < lines_count; i++)
+    {
+        fprintf (file_shuffled, "%ld\n", file_numbers_array[i]);
     }
+
+    if (DEBUG)
+        printf ("DEBUG: Computing stats...\n");
 
     if (STATS)
     {
-        int count = my_count_consecutive_array (numbers_arr, lines_number);
+        long count = my_count_consecutive_array (file_numbers_array, lines_count);
 
-        printf("STATS: Consecutive elements: %.2f%%, %d / %d\n",
-               (double) 100 * count / lines_number, count, lines_number);
+        printf ("STATS: Consecutive numbers: %.2f%%, %ld / %ld\n",
+               (double) 100 * count / lines_count, count, lines_count);
     }
+
+    if (DEBUG)
+        printf ("DEBUG: my_generate_input_files finished.\n");
 
     return 1;
 }
 
-/* Get the number of digits of an int. */
+/* Get the number of digits of a number. */
 
 static int
-my_get_digits (int number)
+my_get_digits (long number)
 {
     int digits = 0;
 
@@ -237,11 +251,22 @@ my_get_digits (int number)
  * writes to file_sorted_path. Returns 1 on success. */
 
 static int
-my_sort_file (char *file_shuffled_path, char *file_sorted_path)
+my_sort_file (char *file_shuffled_path, char *file_sorted_path,
+              long *file_numbers_array, long file_numbers_array_count)
 {
-    int i;
+    long i;
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: Called my_sort_file with arguments: \n");
+        printf ("DEBUG: file_shuffled_path = %s\n", file_shuffled_path);
+        printf ("DEBUG: file_sorted_path = %s\n", file_sorted_path);
+    }
 
     /* Access to file_shuffled. */
+
+    if (DEBUG)
+        printf ("DEBUG: Accessing file_shuffled...\n");
 
     if (access (file_shuffled_path, F_OK) != 0)
     {
@@ -263,39 +288,77 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path)
 
     /* Reading file_shuffled. */
 
-    file_numbers_array = malloc (sizeof (unsigned int));
+    if (DEBUG)
+        printf ("DEBUG: Reading file_shuffled...\n");
+
+    file_numbers_array = malloc (sizeof (long));
 
     if (file_numbers_array == NULL)
     {
         my_print_error ("Can't allocate memory to file_numbers_array", "");
 
-        my_exit (-1);
+        my_exit (-1, NULL);
     }
 
-    while (fscanf (file_shuffled, "%d", &file_numbers_array[file_numbers_array_count]) == 1)
+    while (fscanf (file_shuffled, "%ld", &file_numbers_array[file_numbers_array_count]) == 1)
     {
         file_numbers_array_count += 1;
 
-        file_numbers_array = realloc (file_numbers_array, (file_numbers_array_count + 1) * sizeof (unsigned int));
+        file_numbers_array = realloc (file_numbers_array,
+                                      (file_numbers_array_count + 1) * sizeof (long));
 
         if (file_numbers_array == NULL)
         {
             my_print_error ("Can't reallocate memory to file_numbers_array", "");
 
-            my_exit (-1);
+            my_exit (-1, NULL);
         }
     }
 
-    /* Insertion Sort */
+    /* Estimate time for sorting */
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: Estimating time for sorting %ld numbers...\n", file_numbers_array_count);
+
+        double time_estimated = my_get_estimated_time_sort(my_insertion_sort,
+                                                           file_numbers_array,
+                                                           file_numbers_array_count);
+
+        if (time_estimated == -1)
+        {
+            my_print_error("Error while estimating time for sorting.", "");
+
+            return 0;
+        }
+
+        printf ("DEBUG: Time estimated for sorting: %.2f s\n", time_estimated);
+    }
+
+    /* Sort */
+
+    clock_t timeStart = clock ();
 
     if (my_insertion_sort (file_numbers_array, file_numbers_array_count) == 0)
     {
-        my_print_error("Error on insertion sort.", "");
+        my_print_error ("Error on insertion sort.", "");
 
-        my_exit(-1);
+        my_exit(-1, file_numbers_array);
+    }
+
+    clock_t timeEnd = clock ();
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: Time needed for sorting: %.2f s\n", (float) (timeEnd - timeStart) / CLOCKS_PER_SEC);
     }
 
     /* Access to file_sorted. */
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: Accessing file_sorted...\n");
+    }
 
     if (access (file_sorted_path, F_OK) == 0)
     {
@@ -315,18 +378,26 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path)
         }
     }
 
+    if (DEBUG)
+    {
+        printf ("DEBUG: Writing to file_sorted...\n");
+    }
+
     for (i = 0; i < file_numbers_array_count; i++)
     {
-        if (fprintf (file_sorted, "%d\n", file_numbers_array[i]) < 0)
+        if (fprintf (file_sorted, "%ld\n", file_numbers_array[i]) < 0)
         {
             char str[my_get_digits(i) + 1];
 
-            // itoa(i, str, 10); //throws error on some compilers
-
-            sprintf(str, "%d", i);
+            sprintf (str, "%ld", i);
 
             my_print_error ("Error while writing in file_sorted. Last element", str);
         }
+    }
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: my_sort_file finished.\n");
     }
 
     return 1;
@@ -335,57 +406,89 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path)
 int
 main (int argc, char* argv[])
 {
+    /* Array of unsorted input file numbers. */
+
+    long *file_numbers_array = NULL;
+
+    /* The total number of elements in array. */
+
+    long file_numbers_array_count = 0;
+
     /* Get system available memory */
+
+    if (DEBUG)
+        printf ("DEBUG: Getting system available memory...\n");
 
     mem_available_kB = my_get_system_available_memory_kB ();
 
     if (mem_available_kB == 0)
-        my_exit(-1);
+        my_exit (-1, file_numbers_array);
 
     if (DEBUG)
-        printf("DEBUG: MemAvailable: %llu kB\n", mem_available_kB);
+        printf ("DEBUG: MemAvailable: %llu kB\n", mem_available_kB);
+
+    /* Calculate the maximum amount of lines that can be generated.
+     * 2000 bytes is base memory required to run the program. */
+
+    unsigned long long possible_lines_to_generate = (mem_available_kB * 1024 - 2000) / 4;
+
+    if (DEBUG)
+        printf ("DEBUG: Total number of possible lines to generate: %llu \n",
+               possible_lines_to_generate);
 
     /* Check argument options */
+
+    if (DEBUG)
+        printf ("DEBUG: Getting argument options...\n");
 
     if (argc == 2 && (strcmp (argv[1], "--help") == 0
         || strcmp (argv[1], "-v") == 0))
     {
         /* --help or -v option */
 
-        my_print_help(argv[1]);
+        if (DEBUG)
+            printf ("DEBUG: --help or -v option selected.\n");
 
-        my_exit(0);
+        my_print_help (argv[1]);
+
+        my_exit (0, file_numbers_array);
     }
     else if (argc == 5 && (strcmp (argv[1], "--generate") == 0
              || strcmp (argv[1], "-g") == 0)
             && strlen (argv[2]) < 128 && strlen (argv[3]) < 128
-            && strtol (argv[4], NULL, 10) >= 2)
+            && strtol (argv[4], NULL, 10) >= 2 && strtol (argv[4], NULL, 10) < 2147483647)
     {
         /* -generate option */
 
-        int line_count = strtol (argv[4], NULL, 10);
+        long line_count = strtol (argv[4], NULL, 10);
 
-        unsigned long long mem_required_kB = (2000 + line_count * 4) / 1024;
+        if (DEBUG)
+        {
+            printf ("DEBUG: -generate option selected\n");
+            printf ("DEBUG: line_count = %ld\n", line_count);
+        }
+
+        unsigned long mem_required_kB = (2000 + line_count * 4) / 1024;
 
         if (mem_required_kB >= mem_available_kB)
         {
             char str[256];
 
             sprintf (str, "Fail to generate. Using too much "
-                         "memory, %llu kB out of %llu kB available.",
+                         "memory, %lu kB out of %llu kB available.",
                           mem_required_kB, mem_available_kB);
 
             my_print_error (str, "");
 
-            my_exit (-1);
+            my_exit (-1, file_numbers_array);
         }
 
-        if (my_generate_input_files (argv[2], argv[3], line_count) == 0)
+        if (my_generate_input_files (argv[2], argv[3], line_count, file_numbers_array) == 0)
         {
-            my_exit (-1);
+            my_exit (-1, file_numbers_array);
         }
 
-        my_exit (0);
+        my_exit (0, file_numbers_array);
     }
     else if (argc == 4 && (strcmp (argv[1], "--sort") == 0
              || strcmp (argv[1], "-s") == 0)
@@ -393,12 +496,12 @@ main (int argc, char* argv[])
     {
         /* -sort option */
 
-        if (my_sort_file (argv[2], argv[3]) == 0)
+        if (my_sort_file (argv[2], argv[3], file_numbers_array, file_numbers_array_count) == 0)
         {
-            my_exit(-1);
+            my_exit (-1, file_numbers_array);
         }
 
-        my_exit (0);
+        my_exit (0, file_numbers_array);
     }
     else
     {
@@ -406,7 +509,7 @@ main (int argc, char* argv[])
 
         my_print_help ("");
 
-        my_exit (0);
+        my_exit (0, file_numbers_array);
     }
 
     return 0;
