@@ -4,22 +4,18 @@
 
 #include "lib/my_print.h"
 
-enum
-{
-    STATS = 1
-};
-
 extern char *VERSION;
 
-/* Prints error to stderr, adds \n and exits the program with code -1. var is used as a variable value. */
+/* Prints error to stderr, adds \n and exits the program with code -1.
+ * var is used as a variable value. */
 
 void
 my_print_error (char *message, char *var)
 {
     if (strcmp (var, "") == 0)
-        fprintf(stderr, "%s\n", message);
+        fprintf (stderr, "%s\n", message);
     else
-        fprintf(stderr, "%s - '%s'\n", message, var);
+        fprintf (stderr, "%s - '%s'\n", message, var);
 }
 
 /* Prints help or version information; flag = "" is same as "--help". */
@@ -41,7 +37,7 @@ my_print_help (char *flag)
                 "consecutive positive numbers.\n",
                 "-g, --generate <filename_original> <filename_shuffled> <line_count>");
         printf (" %-68s Second is shuffled version of the first. <line_count> "
-                "is 2..N .\n\n", "");
+                "is 2..2,147,483,647 .\n\n", "");
 
         printf (" %-68s Sorts the init file using Insertion Sort and outputs "
                     "in a new file\n\n", "-s, --sort <file_shuffled> <filename_result>");
