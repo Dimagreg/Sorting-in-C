@@ -1,8 +1,12 @@
 /*
  * TODO: separate sorting process in 3 different function - read, sort, write
+
  *       when reading sort check for number
+ 
  *       calculate estimate time of computing
+ 
  *       progress bar?
+ 
  *       parallel sorting:
  *       basically for 500 random values in a file separate it to 1..10 parallel processes
  *       where for example if chooses 5 it will create 5 different arrays of equal interval of
@@ -46,35 +50,27 @@ enum
 };
 
 /* Program version. */
-
 char *VERSION = "20-Jul-23";
 
 /* Array of unsorted input file numbers. */
-
 long *file_numbers_array = NULL;
 
 /* The total number of elements in array. */
-
 long file_numbers_array_count = 0;
 
 /* Original file of elements which are then shuffled. */
-
 static FILE *file_original;
 
 /* Shuffled file_original. */
-
 static FILE *file_shuffled;
 
 /* Output sorted file. */
-
 static FILE *file_sorted;
 
 /* System available memory in kB */
-
 static unsigned long long mem_available_kB;
 
 /* Free's allocated memory and exits with code. */
-
 static void
 my_exit (int code)
 {
@@ -97,7 +93,6 @@ my_exit (int code)
 }
 
 /* Counts the number of consecutive array elements. */
-
 static long
 my_count_consecutive_array (const long *arr, long n)
 {
@@ -116,7 +111,6 @@ my_count_consecutive_array (const long *arr, long n)
 /* Generates two files; file_original contains original values that are then
  * shuffled and written to file_shuffled. The number of values depend
  * on lines_number. Returns 1 on success. */
-
 static int
 my_generate_input_files (char *file_original_path, char *file_shuffled_path,
                          long lines_count, long *file_numbers_array)
@@ -239,7 +233,6 @@ my_generate_input_files (char *file_original_path, char *file_shuffled_path,
 }
 
 /* Get the number of digits of a number. */
-
 static int
 my_get_digits (long number)
 {
@@ -257,7 +250,6 @@ my_get_digits (long number)
 
 /* Reads file_shuffled_path, sorts the array based on insertion sort and
  * writes to file_sorted_path. Returns 1 on success. */
-
 static int
 my_sort_file (char *file_shuffled_path, char *file_sorted_path,
               long *file_numbers_array, long file_numbers_array_count)

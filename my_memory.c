@@ -8,7 +8,6 @@
 
 /* Gets 80% of system available memory in kB located in /proc/meminfo.
  * Returns 0 on fail. */
-
 unsigned long long
 my_get_system_available_memory_kB (void)
 {

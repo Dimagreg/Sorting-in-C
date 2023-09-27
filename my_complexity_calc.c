@@ -6,7 +6,6 @@
 /* Calculate estimated time of sorting algorithm.
  * Takes a sorting function as parameter.
  * Returns time in seconds. On error returns -1. */
-
 double
 my_get_estimated_time_sort (int (*sort_function) (long*, long),
                             long *file_numbers_array, long lines_count)

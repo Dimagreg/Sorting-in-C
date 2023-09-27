@@ -2,7 +2,6 @@
 #include <time.h>
 
 /* Randomly shuffle elements of array. */
-
 void
 my_shuffle_array (long *file_numbers_array, long lines_count)
 {
@@ -28,7 +27,6 @@ my_shuffle_array (long *file_numbers_array, long lines_count)
 
 
 /* Sorts the array based on Insertion Sort, O(n^2). Returns 1 on success. */
-
 int
 my_insertion_sort (long *arr, long size)
 {
@@ -52,7 +50,6 @@ my_insertion_sort (long *arr, long size)
 }
 
 /* Sorts the array based on Bubble Sort, O(n^2). Returns 1 on success. */
-
 int
 my_bubble_sort (long *arr, long size)
 {

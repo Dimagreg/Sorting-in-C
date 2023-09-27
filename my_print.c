@@ -8,7 +8,6 @@ extern char *VERSION;
 
 /* Prints error to stderr, adds \n and exits the program with code -1.
  * var is used as a variable value. */
-
 void
 my_print_error (char *message, char *var)
 {
@@ -19,7 +18,6 @@ my_print_error (char *message, char *var)
 }
 
 /* Prints help or version information; flag = "" is same as "--help". */
-
 void
 my_print_help (char *flag)
 {
