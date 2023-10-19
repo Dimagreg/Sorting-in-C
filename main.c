@@ -321,7 +321,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
     {
         printf ("DEBUG: Estimating time for sorting %ld numbers...\n", file_numbers_array_count);
 
-        double time_estimated = my_get_estimated_time_sort(my_insertion_sort,
+        double time_estimated = my_get_estimated_time_sort(insertion_sort,
                                                            file_numbers_array,
                                                            file_numbers_array_count);
 
@@ -339,7 +339,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
 
     clock_t timeStart = clock ();
 
-    if (my_insertion_sort (file_numbers_array, file_numbers_array_count) == 0)
+    if (heapSort (file_numbers_array, file_numbers_array_count) == 0)
     {
         my_print_error ("Error on insertion sort.", "");
 
@@ -353,7 +353,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
         printf ("DEBUG: Time needed for sorting: %.2f s\n", (float) (timeEnd - timeStart) / CLOCKS_PER_SEC);
     }
 
-    /* Access to file_sorted. */
+    /* Access to file_sorted. */ //TODO: check if file_sorted exists before sorting
 
     if (DEBUG)
     {
