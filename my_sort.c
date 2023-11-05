@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-void swap(long *xp, long *yp)
+void 
+swap (long *xp, long *yp)
 {
     long temp = *xp;
     *xp = *yp;
@@ -39,7 +40,7 @@ Time Complexity: O(N^2)
 Average time to sort 100,000 numbers: 14.50s 
 */
 int
-insertion_sort (long *arr, long size)
+insertionSort (long *arr, long size)
 {
     long key;
     long j, i;
@@ -66,7 +67,7 @@ Time Complexity: O(N^2)
 Average time to sort 100,000 numbers: 62.55s 
 */
 int
-bubble_sort (long *arr, long size)
+bubbleSort (long *arr, long size)
 {
     long i, j, temp;
     int swapped;
@@ -214,10 +215,10 @@ partition (long arr[],long low,long high)
     {
       //Increment index of smaller element
       i++;
-      swap(arr[i],arr[j]);
+      swap(&arr[i],&arr[j]);
     }
   }
-  swap(arr[i+1],arr[high]);
+  swap(&arr[i+1],&arr[high]);
   return (i+1);
 }
  
@@ -243,14 +244,7 @@ quickSort (long arr[],long low,long high) //TODO: test
   return 1;
 }
 
-/*Heap sort is a comparison-based sorting technique based on Binary Heap data structure. It is similar to the selection sort where we first find the minimum element and place the minimum element at the beginning. Repeat the same process for the remaining elements.
 
-Time Complexity: O(N log(N))
-Average time to sort 100,000 numbers: ?
-*/
-// To heapify a subtree rooted with node i
-// which is an index in arr[].
-// n is size of heap
 void 
 heapify (long arr[], long N, long i) //TODO: on make gives warnings due to swap function
 {
@@ -290,7 +284,10 @@ heapify (long arr[], long N, long i) //TODO: on make gives warnings due to swap 
     }
 }
  
-// Main function to do heap sort
+/*Heap sort is a comparison-based sorting technique based on Binary Heap data structure. It is similar to the selection sort where we first find the minimum element and place the minimum element at the beginning. Repeat the same process for the remaining elements.
+Time Complexity: O(N log(N))
+Average time to sort 100,000 numbers: ?
+*/
 int 
 heapSort(long arr[], long N)
 {
@@ -310,6 +307,170 @@ heapSort(long arr[], long N)
         // root again
         heapify(arr, i, 0);
     }
+
+    return 1;
+}
+
+long 
+getMax (long a[], long n) {  
+   long max = a[0];  
+   
+   for (long i = 1; i < n; i++)
+   {  
+    if (a[i] > max)  
+        max = a[i];  
+   }  
+   return max; //maximum element from the array  
+}  
+  
+/*Counting Sort is a non-comparison-based sorting algorithm that works well when there is limited range of input values. It is particularly efficient when the range of input values is small compared to the number of elements to be sorted. The basic idea behind Counting Sort is to count the frequency of each distinct element in the input array and use that information to place the elements in their correct sorted positions.
+Time Complexity: O(N+M), where N and M are the size of inputArray[] and countArray[] respectively.
+Average time to sort 100,000 numbers: ?
+*/
+int 
+countSort (long a[], long n)  
+{  
+    long output[n + 1];  
+    long max = getMax (a, n);  
+    long count[max + 1]; //create count array with size [max+1]  
+  
+  
+    for (long i = 0; i <= max; ++i)   
+    {  
+        count[i] = 0; // Initialize count array with all zeros  
+    }  
+    
+    for (long i = 0; i < n; i++) // Store the count of each element  
+    {  
+        count[a[i]]++;  
+    }  
+  
+    for (long i = 1; i <= max; i++)   
+        count[i] += count[i - 1]; //find cumulative frequency  
+
+    /* This loop will find the index of each element of the original array in count array, and 
+    place the elements in output array*/  
+    for (long i = n - 1; i >= 0; i--) 
+    {  
+        output[count[a[i]] - 1] = a[i];  
+        count[a[i]]--; // decrease count for same numbers  
+    }  
+  
+    for (long i = 0; i < n; i++) 
+    {  
+      a[i] = output[i]; //store the sorted elements into main array  
+    }  
+
+    return 1;
+}  
+
+void 
+countingSort (long a[], long n, long place) // counting sort for radix  
+{  
+    long output[n + 1];  
+    long count[10] = {0};    
+    
+    // Calculate count of elements  
+    for (long i = 0; i < n; i++)  
+        count[(a[i] / place) % 10]++;  
+        
+    // Calculate cumulative frequency  
+    for (long i = 1; i < 10; i++)  
+        count[i] += count[i - 1];  
+    
+    // Place the elements in sorted order  
+    for (long i = n - 1; i >= 0; i--) 
+    {  
+        output[count[(a[i] / place) % 10] - 1] = a[i];  
+        count[(a[i] / place) % 10]--;  
+    }  
+    
+    for (long i = 0; i < n; i++)  
+        a[i] = output[i];  
+}  
+  
+/*Radix Sort is a linear sorting algorithm that sorts elements by processing them digit by digit. It is an efficient sorting algorithm for integers or strings with fixed-size keys. 
+Time Complexity: O(d * (n + b)), where d is the number of digits, n is the number of elements, and b is the base of the number system being used.
+Average time to sort 100,000 numbers: ?
+*/ 
+int 
+radixSort (long a[], long n) {  
+   
+    // get maximum element from array  
+    long max = getMax (a, n);  
+    
+    // Apply counting sort to sort elements based on place value  
+    for (long place = 1; max / place > 0; place *= 10)  
+        countingSort (a, n, place);  
+
+    return 1;
+}  
+
+/*Bucket sort is a sorting technique that involves dividing elements into various groups, or buckets. These buckets are formed by uniformly distributing the elements. Once the elements are divided into buckets, they can be sorted using any other sorting algorithm. Finally, the sorted elements are gathered together in an ordered fashion.
+Time Complexity: O(n^2)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+bucketSort (long a[], long n)
+{  
+    long max = getMax(a, n); //max is the maximum element of array  
+    long bucket[max];  
+
+    for (long i = 0; i <= max; i++)  
+    {  
+        bucket[i] = 0;  
+    }  
+    for (long i = 0; i < n; i++)  
+    {  
+        bucket[a[i]]++;  
+    }  
+    for (long i = 0, j = 0; i <= max; i++)  
+    {  
+        while (bucket[i] > 0)  
+        {  
+        a[j++] = i;  
+        bucket[i]--;  
+        }  
+    }  
+
+    return 1;
+}  
+
+/*This Sorting Technique is similar to the Selection Sort in which we first find the smallest element called Bingo Element, and then we repeatedly iterate the elements of the array to get the correct positions of all the elements. Similarly, find the next bingo element for the next pass, and so on. Every distinct element is considered a Bingo Element and called out in increasing order.
+Time Complexity: O(M * N) where M = number of distinct elements and N = size of the array
+Average time to sort 100,000 numbers: ?
+*/
+int 
+bingoSort(long arr[], long n)
+{
+    long min = arr[0], max = arr[0];
+    long i;
+
+    for (i = 1; i < n; i++)
+    {
+        if (arr[i] < min)
+            min = arr[i];
+        else if (arr[i] > max)
+            max = arr[i];
+    }
+    
+    long *flags = (long *)calloc(max - min + 1, sizeof(long));
+    
+    for (i = 0; i < n; i++)
+        flags[arr[i] - min] = 1;
+    
+    long index = 0;
+    
+    for (i = 0; i < max - min + 1; i++)
+    {
+        if (flags[i])
+        {
+            arr[index] = i + min;
+            index++;
+        }
+    }
+ 
+    free(flags);
 
     return 1;
 }
