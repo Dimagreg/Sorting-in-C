@@ -1,3 +1,15 @@
+/*
+ *  Utility program for generating/sorting a file of unsorted unsigned integers
+ *   --help
+ *   -v
+ *   -g, --generate <filename_original> <filename_shuffled> <line_count>
+ *              filename_original and filename_shuffled - non_space string 1....128
+ *              line_count - 2....2,147,483,647 (max long value)
+ *
+ *   -s, --sort <file_shuffled> <filename_result>
+ *          file_shuffled and filename_result - non_space string 1....128
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
