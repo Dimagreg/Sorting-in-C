@@ -1,11 +1,12 @@
 /*
- * TODO: separate sorting process in 3 different function - read, sort, write
+ * TODO: 
+         add more sorting algorithms
 
- *       when reading sort check for number
- 
  *       calculate estimate time of computing
- 
- *       progress bar?
+
+         add help2man instead of my_print.c
+
+         add test if a file has sorted numbers
  
  *       parallel sorting:
  *       basically for 500 random values in a file separate it to 1..10 parallel processes
@@ -248,11 +249,11 @@ my_get_digits (long number)
     return digits;
 }
 
-/* Reads file_shuffled_path, sorts the array based on insertion sort and
- * writes to file_sorted_path. Returns 1 on success. */
+/* Reads <file_shuffled_path>, sorts the array based on <sorting_function_name> and
+*  writes to <file_sorted_path>. Returns 1 on success. */
 static int
-my_sort_file (char *file_shuffled_path, char *file_sorted_path,
-              long *file_numbers_array, long file_numbers_array_count)
+my_sort_file (char *sorting_function_name ,char *file_shuffled_path, 
+char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
 {
     long i;
 
@@ -263,7 +264,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
         printf ("DEBUG: file_sorted_path = %s\n", file_sorted_path);
     }
 
-    /* Access to file_shuffled. */
+    /* Access to <file_shuffled_path>. */
 
     if (DEBUG)
         printf ("DEBUG: Accessing file_shuffled...\n");
@@ -286,74 +287,7 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
         }
     }
 
-    /* Reading file_shuffled. */
-
-    if (DEBUG)
-        printf ("DEBUG: Reading file_shuffled...\n");
-
-    file_numbers_array = malloc (sizeof (long));
-
-    if (file_numbers_array == NULL)
-    {
-        my_print_error ("Can't allocate memory to file_numbers_array", "");
-
-        my_exit (-1);
-    }
-
-    while (fscanf (file_shuffled, "%ld", &file_numbers_array[file_numbers_array_count]) == 1)
-    {
-        file_numbers_array_count += 1;
-
-        file_numbers_array = realloc (file_numbers_array,
-                                      (file_numbers_array_count + 1) * sizeof (long));
-
-        if (file_numbers_array == NULL)
-        {
-            my_print_error ("Can't reallocate memory to file_numbers_array", "");
-
-            my_exit (-1);
-        }
-    }
-
-    /* Estimate time for sorting */
-
-    if (DEBUG)
-    {
-        printf ("DEBUG: Estimating time for sorting %ld numbers...\n", file_numbers_array_count);
-
-        double time_estimated = my_get_estimated_time_sort(insertion_sort,
-                                                           file_numbers_array,
-                                                           file_numbers_array_count);
-
-        if (time_estimated == -1)
-        {
-            my_print_error("Error while estimating time for sorting.", "");
-
-            return 0;
-        }
-
-        printf ("DEBUG: Time estimated for sorting: %.2f s\n", time_estimated);
-    }
-
-    /* Sort */
-
-    clock_t timeStart = clock ();
-
-    if (heapSort (file_numbers_array, file_numbers_array_count) == 0)
-    {
-        my_print_error ("Error on insertion sort.", "");
-
-        my_exit(-1);
-    }
-
-    clock_t timeEnd = clock ();
-
-    if (DEBUG)
-    {
-        printf ("DEBUG: Time needed for sorting: %.2f s\n", (float) (timeEnd - timeStart) / CLOCKS_PER_SEC);
-    }
-
-    /* Access to file_sorted. */ //TODO: check if file_sorted exists before sorting
+    /* Access to <file_sorted_path>. */
 
     if (DEBUG)
     {
@@ -377,6 +311,172 @@ my_sort_file (char *file_shuffled_path, char *file_sorted_path,
             return 0;
         }
     }
+
+    /* Reading file_shuffled. */
+
+    if (DEBUG)
+        printf ("DEBUG: Reading file_shuffled...\n");
+
+    file_numbers_array = malloc (sizeof (long));
+
+    if (file_numbers_array == NULL)
+    {
+        my_print_error ("Can't allocate memory to file_numbers_array", "");
+
+        return 0;
+    }
+
+    while (fscanf (file_shuffled, "%ld", &file_numbers_array[file_numbers_array_count]) == 1)
+    {
+        file_numbers_array_count += 1;
+
+        file_numbers_array = realloc (file_numbers_array,
+                                      (file_numbers_array_count + 1) * sizeof (long));
+
+        if (file_numbers_array == NULL)
+        {
+            my_print_error ("Can't reallocate memory to file_numbers_array", "");
+
+            return 0;
+        }
+    }
+
+    if (DEBUG)
+        printf ("DEBUG: Sorting using %s...\n", sorting_function_name);
+
+    /* Estimate time for sorting */ //TODO: dynamic estimation
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: Estimating time for sorting %ld numbers...\n", file_numbers_array_count);
+
+        double time_estimated = my_get_estimated_time_sort(insertionSort,
+                                                           file_numbers_array,
+                                                           file_numbers_array_count);
+
+        if (time_estimated == -1)
+        {
+            my_print_error("Error while estimating time for sorting.", "");
+
+            return 0;
+        }
+
+        printf ("DEBUG: Time estimated for sorting: %.2f s\n", time_estimated);
+    }
+
+    /* Sort */
+
+    clock_t timeStart = clock ();
+
+    if (strcmp (sorting_function_name, "bubbleSort"))
+    {
+
+        if (bubbleSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on bubbleSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "insertionSort") == 0)
+    {
+        if (insertionSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on insertionSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "selectionSort") == 0)
+    {
+        if (selectionSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on selectionSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "mergeSort") == 0)
+    {
+        if (mergeSort (file_numbers_array, 0, file_numbers_array_count - 1) == 0)
+        {
+            my_print_error ("Error on mergeSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "quickSort") == 0)
+    {
+        if (quickSort (file_numbers_array, 0, file_numbers_array_count - 1) == 0)
+        {
+            my_print_error ("Error on quickSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "heapSort") == 0)
+    {
+        if (heapSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on heapSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "countSort") == 0)
+    {
+        if (countSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on countSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "radixSort") == 0)
+    {
+        if (radixSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on radixSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "bucketSort") == 0)
+    {
+        if (bucketSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on bucketSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "bingoSort") == 0)
+    {
+        if (bingoSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on bingoSort.", "");
+
+            return 0;
+        }
+    }
+    else
+    {
+        my_print_error ("Unknown command.\n", "");
+
+        my_print_help ("");
+
+        return 0;
+    }
+    /*TODO: FINISH*/
+
+    clock_t timeEnd = clock ();
+
+    if (DEBUG)
+    {
+        printf ("DEBUG: Time needed for sorting: %.2f s\n", (float) (timeEnd - timeStart) / CLOCKS_PER_SEC);
+    }
+
+    /* Access to file_sorted. */ //TODO: check if file_sorted exists before sorting
 
     if (DEBUG)
     {
@@ -482,15 +582,115 @@ main (int argc, char* argv[])
 
         my_exit (0);
     }
+    /* --sort <file_shuffled> <filename_result>*/
     else if (argc == 4 && (strcmp (argv[1], "--sort") == 0
              || strcmp (argv[1], "-s") == 0)
-            && strlen (argv[2]) < 128 && strlen (argv[3]) < 128 )
+            && strlen (argv[2]) < 128 && strlen (argv[3]) < 128)
     {
-        /* -sort option */
+        
+        /* quicksort by default */
 
-        if (my_sort_file (argv[2], argv[3], file_numbers_array, file_numbers_array_count) == 0)
+        if (my_sort_file ("quickSort", argv[2], argv[3], file_numbers_array, 
+                        file_numbers_array_count) == 0)
         {
             my_exit (-1);
+        }
+
+        my_exit (0);
+    }
+    /* --sort [algorithm option] <file_shuffled> <filename_result>*/
+    else if (argc == 5 && (strcmp (argv[1], "--sort") == 0
+             || strcmp (argv[1], "-s") == 0)
+            && strlen (argv[2]) < 128 && strlen (argv[3]) < 128 && strlen(argv[4]) < 128)
+    {
+        
+        /* -sort option */
+
+        if (strcmp (argv[2], "insertion") == 0)
+        {
+            if (my_sort_file ("insertionSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "bubble") == 0)
+        {
+            if (my_sort_file ("bubbleSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "selection") == 0)
+        {
+            if (my_sort_file ("selectionSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "merge") == 0)
+        {
+            if (my_sort_file ("mergeSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "quick") == 0)
+        {
+            if (my_sort_file ("quickSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "heap") == 0)
+        {
+            if (my_sort_file ("heapSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "count") == 0)
+        {
+            if (my_sort_file ("countSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "radix") == 0)
+        {
+            if (my_sort_file ("radixSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "bucket") == 0)
+        {
+            if (my_sort_file ("bucketSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "bingo") == 0)
+        {
+            if (my_sort_file ("bingoSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else
+        {
+            my_print_error ("Unknown algorithm option.\n", "");
+
+            my_print_help ("");
         }
 
         my_exit (0);
