@@ -46,8 +46,8 @@
 
 enum
 {
-    DEBUG = 1,
-    STATS = 1
+    DEBUG = 0,
+    STATS = 0
 };
 
 /* Program version. */
@@ -481,8 +481,6 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
     {
         my_print_error ("Unknown command.\n", "");
 
-        my_print_help ("");
-
         return 0;
     }
     /*TODO: FINISH*/
@@ -722,18 +720,14 @@ main (int argc, char* argv[])
         }
         else
         {
-            my_print_error ("Unknown algorithm option.\n", "");
-
-            my_print_help ("");
+            my_print_error ("Unknown algorithm option. Use --help for more info.\n", "");
         }
 
         my_exit (0);
     }
     else
     {
-        my_print_error ("Unknown command.\n", "");
-
-        my_print_help ("");
+        my_print_error ("Unknown command. Use --help for more info.\n", "");
 
         my_exit (0);
     }
