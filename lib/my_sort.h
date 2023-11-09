@@ -32,6 +32,12 @@ int
 bucketSort (long a[], long n);
 
 int 
-bingoSort(long arr[], long n);
+bingoSort (long arr[], long n);
+
+int 
+shellSort (long arr[], long n);
+
+int 
+timSort (long arr[], long n);
 
 #endif //__MY_SORT_H

@@ -459,6 +459,24 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
             return 0;
         }
     }
+    else if (strcmp (sorting_function_name, "shellSort") == 0)
+    {
+        if (shellSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on shellSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "timSort") == 0)
+    {
+        if (timSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on timSort.", "");
+
+            return 0;
+        }
+    }
     else
     {
         my_print_error ("Unknown command.\n", "");
@@ -681,6 +699,22 @@ main (int argc, char* argv[])
         else if (strcmp (argv[2], "bingo") == 0)
         {
             if (my_sort_file ("bingoSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "shell") == 0)
+        {
+            if (my_sort_file ("shellSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "tim") == 0)
+        {
+            if (my_sort_file ("timSort", argv[3], argv[4], file_numbers_array, 
                             file_numbers_array_count) == 0)
             {
                 my_exit (-1);

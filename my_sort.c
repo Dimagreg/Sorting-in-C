@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
+
+const long RUN = 32;
 
 void 
 swap (long *xp, long *yp)
@@ -127,7 +130,7 @@ Time Complexity: O(N log(N))
 Average time to sort 100,000 numbers: ?
 */
 void 
-merge (long arr[], long l, long m, long r) //TODO: test and write in main
+merge (long arr[], long l, long m, long r)
 {
     long i, j, k;
     long n1 = m - l + 1;
@@ -471,6 +474,101 @@ bingoSort(long arr[], long n)
     }
  
     free(flags);
+
+    return 1;
+}
+
+/*Shell sort is mainly a variation of Insertion Sort. In insertion sort, we move elements only one position ahead. When an element has to be moved far ahead, many movements are involved. The idea of ShellSort is to allow the exchange of far items. In Shell sort, we make the array h-sorted for a large value of h. We keep reducing the value of h until it becomes 1. An array is said to be h-sorted if all sublists of every h’th element are sorted. 
+Time Complexity: O(n^2)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+shellSort (long arr[], long n) 
+{ 
+    // Start with a big gap, then reduce the gap 
+    for (long gap = n/2; gap > 0; gap /= 2) 
+    { 
+        // Do a gapped insertion sort for this gap size. 
+        // The first gap elements a[0..gap-1] are already in gapped order 
+        // keep adding one more element until the entire array is 
+        // gap sorted  
+        for (long i = gap; i < n; i += 1) 
+        { 
+            // add a[i] to the elements that have been gap sorted 
+            // save a[i] in temp and make a hole at position i 
+            long temp = arr[i]; 
+  
+            // shift earlier gap-sorted elements up until the correct  
+            // location for a[i] is found 
+            long j;             
+            for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) 
+                arr[j] = arr[j - gap]; 
+              
+            //  put temp (the original a[i]) in its correct location 
+            arr[j] = temp; 
+        } 
+    } 
+
+    return 1; 
+}
+
+// This function sorts array from left
+// index to to right index which is
+// of size atmost RUN
+void 
+insertionsort (long arr[], long left, long right)
+{
+    for (long i = left + 1; i <= right; i++) {
+        int temp = arr[i];
+        int j = i - 1;
+        while (j >= left && arr[j] > temp) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = temp;
+    }
+}
+
+/*Tim Sort is a hybrid sorting algorithm derived from merge sort and insertion sort. It was designed to perform well on many kinds of real-world data. Tim Sort is the default sorting algorithm used by Python’s sorted() and list.sort() functions.
+Time Complexity: O(n*log(n))
+Average time to sort 100,000 numbers: ?
+*/
+int 
+timSort (long arr[], long n)
+{
+
+    // Sort individual subarrays of size RUN
+    for (long i = 0; i < n; i += RUN)
+        insertionsort(arr, i, fmin((i + RUN - 1), (n - 1)));
+
+    // Start merging from size RUN (or 32).
+    // It will merge
+    // to form size 64, then 128, 256
+    // and so on ....
+    for (long size = RUN; size < n; size = 2 * size) {
+
+        // pick starting point of
+        // left sub array. We
+        // are going to merge
+        // arr[left..left+size-1]
+        // and arr[left+size, left+2*size-1]
+        // After every merge, we
+        // increase left by 2*size
+        for (long left = 0; left < n; left += 2 * size) {
+
+            // Find ending point of
+            // left sub array
+            // mid+1 is starting point
+            // of right sub array
+            long mid = left + size - 1;
+            long right = fmin((left + 2 * size - 1), (n - 1));
+
+            // merge sub array arr[left.....mid] &
+            // arr[mid+1....right]
+            if (mid < right)
+                merge(arr, left, mid, right);
+        }
+    }
 
     return 1;
 }
