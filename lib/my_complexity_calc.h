@@ -1,4 +1,4 @@
-#ifndef __COMPLEXITY_CALC_H
+#ifndef __MY_COMPLEXITY_CALC_H
 #define __MY_COMPLEXITY_CALC_H
 
 double
