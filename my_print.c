@@ -36,21 +36,7 @@ my_print_help (char *flag)
 
     if (strcmp (flag, "--help") == 0 || strcmp (flag, "") == 0)
     {
-        printf ("Usage:\n"
-               ".\\my_sort [OPTION...] [file_path] [number]\n\n"
-               "Utility program for generating/sorting a file of unsorted unsigned integers.\n\n"
-               "Application Options:\n");
-
-        printf (" %-68s Prints Program version\n\n", "-v");
-
-        printf (" %-68s Generates 2 files. First consists of 2..line_count "
-                "consecutive positive numbers.\n",
-                "-g, --generate <filename_original> <filename_shuffled> <line_count>");
-        printf (" %-68s Second is shuffled version of the first. <line_count> "
-                "is 2..2,147,483,647 .\n\n", "");
-
-        printf (" %-68s Sorts the init file using Insertion Sort and outputs "
-                    "in a new file\n\n", "-s, --sort <file_shuffled> <filename_result>");
+        system("man mySort");
     }
     else if (strcmp (flag, "-v") == 0)
     {
