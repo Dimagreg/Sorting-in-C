@@ -51,6 +51,14 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+# Idea Files
 .idea
+
+# Temporary Files
 *.txt
-*.exe
+
+# Ignore all
+*
+
+# Unignore Man Page
+!*.1.gz
