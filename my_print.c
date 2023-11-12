@@ -1,15 +1,3 @@
-/*
- *  Utility program for generating/sorting a file of unsorted unsigned integers
- *   --help
- *   -v
- *   -g, --generate <filename_original> <filename_shuffled> <line_count>
- *              filename_original and filename_shuffled - non_space string 1....128
- *              line_count - 2....2,147,483,647 (max long value)
- *
- *   -s, --sort <file_shuffled> <filename_result>
- *          file_shuffled and filename_result - non_space string 1....128
- */
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,12 +17,12 @@ my_print_error (char *message, char *var)
         fprintf (stderr, "%s - '%s'\n", message, var);
 }
 
-/* Prints help or version information; flag = "" is same as "--help". */
+/* Calls man if --help argument is passed;*/
 void
 my_print_help (char *flag)
 {
 
-    if (strcmp (flag, "--help") == 0 || strcmp (flag, "") == 0)
+    if (strcmp (flag, "--help") == 0)
     {
         system("man mySort");
     }
