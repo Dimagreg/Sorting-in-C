@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
+
+#include "lib/my_print.h"
 
 const long RUN = 32;
 
@@ -572,3 +575,395 @@ timSort (long arr[], long n)
 
     return 1;
 }
+
+// To find gap between elements
+int 
+getNextGap (int gap)
+{
+    // Shrink gap by Shrink factor
+    gap = (gap * 10) / 13;
+ 
+    if (gap < 1)
+        return 1;
+    return gap;
+}
+ 
+/*Comb Sort is mainly an improvement over Bubble Sort. Bubble sort always compares adjacent values. So all inversions are removed one by one. Comb Sort improves on Bubble Sort by using a gap of the size of more than 1. The gap starts with a large value and shrinks by a factor of 1.3 in every iteration until it reaches the value 1. Thus Comb Sort removes more than one inversion count with one swap and performs better than Bubble Sort.
+Time Complexity: O(n^2)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+combSort (long a[], long n)
+{
+    // Initialize gap
+    long gap = n;
+ 
+    // Initialize swapped as true to make sure that
+    // loop runs
+    int swapped = 1;
+ 
+    // Keep running while gap is more than 1 and last
+    // iteration caused a swap
+    while (gap != 1 || swapped)
+    {
+        // Find next gap
+        gap = getNextGap (gap);
+ 
+        // Initialize swapped as false so that we can
+        // check if swap happened or not
+        swapped = 0;
+ 
+        // Compare all elements with current gap
+        for (int i = 0; i < n - gap; i++)
+        {
+            if (a[i] > a[i + gap])
+            {
+                swap (&a[i], &a[i + gap]);
+                swapped = 1;
+            }
+        }
+    }
+
+    return 1;
+}
+
+/*Pigeonhole sorting is a sorting algorithm that is suitable for sorting lists of elements where the number of elements and the number of possible key values are approximately the same. 
+Time Complexity: O(n + range), where n is the number of elements in the array and range is the range of the input data
+Average time to sort 100,000 numbers: ?
+*/
+int 
+pigeonholeSort (long arr[], long n) 
+{
+    long min = arr[0], max = arr[0];
+    for (long i = 1; i < n; i++) {
+        if (arr[i] < min) {
+            min = arr[i];
+        }
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+
+    long range = max - min + 1;
+    long* pigeonholes = (long*)malloc(range * sizeof(long));
+    memset(pigeonholes, 0, range * sizeof(long));
+
+    if (!pigeonholes){
+        my_print_error("error malloc pigeonhole", "");
+        return 0;
+    }
+
+    for (long i = 0; i < n; i++) {
+        pigeonholes[arr[i] - min]++;
+    }
+
+    long index = 0;
+    for (long i = 0; i < range; i++) {
+        while (pigeonholes[i] > 0) {
+            arr[index++] = i + min;
+            pigeonholes[i]--;
+        }
+    }
+
+    free(pigeonholes);
+
+    return 1;
+}
+
+/*Cycle sort is an in-place, unstable sorting algorithm that is particularly useful when sorting arrays containing elements with a small range of values. The basic idea behind cycle sort is to divide the input array into cycles, where each cycle consists of elements that belong to the same position in the sorted output array. The algorithm then performs a series of swaps to place each element in its correct position within its cycle, until all cycles are complete and the array is sorted.
+Time Complexity: O(n^2)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+cycleSort(long arr[], long n)
+{
+    // count number of memory writes
+    long writes = 0;
+ 
+    // traverse array elements and put it to on
+    // the right place
+    for (long cycle_start = 0; cycle_start <= n - 2; cycle_start++) {
+        // initialize item as starting point
+        long item = arr[cycle_start];
+ 
+        // Find position where we put the item. We basically
+        // count all smaller elements on right side of item.
+        long pos = cycle_start;
+        for (long i = cycle_start + 1; i < n; i++)
+            if (arr[i] < item)
+                pos++;
+ 
+        // If item is already in correct position
+        if (pos == cycle_start)
+            continue;
+ 
+        // ignore all duplicate  elements
+        while (item == arr[pos])
+            pos += 1;
+ 
+        // put the item to it's right position
+        if (pos != cycle_start) {
+            swap(&item, &arr[pos]);
+            writes++;
+        }
+ 
+        // Rotate rest of the cycle
+        while (pos != cycle_start) {
+            pos = cycle_start;
+ 
+            // Find position where we put the element
+            for (int i = cycle_start + 1; i < n; i++)
+                if (arr[i] < item)
+                    pos += 1;
+ 
+            // ignore all duplicate  elements
+            while (item == arr[pos])
+                pos += 1;
+ 
+            // put the item to it's right position
+            if (item != arr[pos]) {
+                swap(&item, &arr[pos]);
+                writes++;
+            }
+        }
+    }
+
+    return 1;
+}
+
+/*Cocktail Sort is a variation of Bubble sort. The Bubble sort algorithm always traverses elements from left and moves the largest element to its correct position in the first iteration and second-largest in the second iteration and so on. Cocktail Sort traverses through a given array in both directions alternatively. Cocktail sort does not go through the unnecessary iteration making it efficient for large arrays.
+Time Complexity: O(n^2)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+cocktailSort (long a[], long n)
+{
+    int swapped = 1;
+    long start = 0;
+    long end = n - 1;
+ 
+    while (swapped) {
+        // reset the swapped flag on entering
+        // the loop, because it might be true from
+        // a previous iteration.
+        swapped = 0;
+ 
+        // loop from left to right same as
+        // the bubble sort
+        for (long i = start; i < end; ++i) {
+            if (a[i] > a[i + 1]) {
+                swap(&a[i], &a[i + 1]);
+                swapped = 1;
+            }
+        }
+ 
+        // if nothing moved, then array is sorted.
+        if (!swapped)
+            break;
+ 
+        // otherwise, reset the swapped flag so that it
+        // can be used in the next stage
+        swapped = 0;
+ 
+        // move the end point back by one, because
+        // item at the end is in its rightful spot
+        --end;
+ 
+        // from right to left, doing the
+        // same comparison as in the previous stage
+        for (int i = end - 1; i >= start; --i) {
+            if (a[i] > a[i + 1]) {
+                swap(&a[i], &a[i + 1]);
+                swapped = 1;
+            }
+        }
+ 
+        // increase the starting point, because
+        // the last stage would have moved the next
+        // smallest number to its rightful spot.
+        ++start;
+    }
+
+    return 1;
+}
+
+/*The parameter dir indicates the sorting direction, ASCENDING
+   or DESCENDING; if (a[i] > a[j]) agrees with the direction,
+   then a[i] and a[j] are interchanged.*/
+void 
+compAndSwap (long a[], long i, long j, long dir)
+{
+    if (dir==(a[i]>a[j]))
+        swap(&a[i],&a[j]);
+}
+ 
+/*It recursively sorts a bitonic sequence in ascending order,
+  if dir = 1, and in descending order otherwise (means dir=0).
+  The sequence to be sorted starts at index position low,
+  the parameter cnt is the number of elements to be sorted.*/
+void 
+bitonicMerge (long a[], long low, long cnt, long dir)
+{
+    if (cnt>1)
+    {
+        long k = cnt/2;
+        for (long i=low; i<low+k; i++)
+            compAndSwap(a, i, i+k, dir);
+        bitonicMerge(a, low, k, dir);
+        bitonicMerge(a, low+k, k, dir);
+    }
+}
+ 
+/*Bitonic Sort is a classic parallel algorithm for sorting. 
+
+The number of comparisons done by Bitonic sort is more than popular sorting algorithms like Merge Sort [ does O(log N) comparisons], but Bitonic sort is better for parallel implementation because we always compare elements in a predefined sequence and the sequence of comparison doesn’t depend on data. Therefore it is suitable for implementation in hardware and parallel processor array.
+Bitonic Sort can only be done if the number of elements to sort is 2^n. The procedure of bitonic sequence fails if the number of elements is not in the aforementioned quantity precisely.
+Time complexity: O(log n)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+bitonicSort (long a[],long low, long cnt, long dir)
+{
+    if (cnt>1)
+    {
+        long k = cnt/2;
+ 
+        // sort in ascending order since dir here is 1
+        bitonicSort(a, low, k, 1);
+ 
+        // sort in descending order since dir here is 0
+        bitonicSort(a, low+k, k, 0);
+ 
+        // Will merge whole sequence in ascending order
+        // since dir=1.
+        bitonicMerge(a,low, cnt, dir);
+
+        return 1;
+    }
+
+    return 0;
+}
+
+/* Reverses arr[0..i] */
+void 
+flip (long arr[], long i)
+{
+    long temp, start = 0;
+    while (start < i) {
+        temp = arr[start];
+        arr[start] = arr[i];
+        arr[i] = temp;
+        start++;
+        i--;
+    }
+}
+ 
+// Returns index of the
+// maximum element in
+// arr[0..n-1]
+long 
+findMax (long arr[], long n)
+{
+    long mi, i;
+    for (mi = 0, i = 0; i < n; ++i)
+        if (arr[i] > arr[mi])
+            mi = i;
+    return mi;
+}
+ 
+/*Pancake sorting is the mathematical problem of sorting a disordered stack of pancakes in order of size when a spatula can be inserted at any point in the stack and used to flip all pancakes above it. A pancake number is the minimum number of flips required for a given number of pancakes.
+Time Complexity: O(n2)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+pancakeSort (long arr[], long n)
+{
+    // Start from the complete
+    // array and one by one
+    // reduce current size
+    // by one
+    for (long curr_size = n; curr_size > 1; 
+                                 --curr_size) 
+    {
+        // Find index of the
+        // maximum element in
+        // arr[0..curr_size-1]
+        long mi = findMax(arr, curr_size);
+ 
+        // Move the maximum
+        // element to end of
+        // current array if
+        // it's not already
+        // at the end
+        if (mi != curr_size - 1) {
+            // To move at the end,
+            // first move maximum
+            // number to beginning
+            flip(arr, mi);
+ 
+            // Now move the maximum
+            // number to end by
+            // reversing current array
+            flip(arr, curr_size - 1);
+        }
+    }
+
+    return 1;
+}
+
+// To check if array is sorted or not
+int 
+isSorted (long a[], long n)
+{
+    while (--n > 0)
+        if (a[n] < a[n - 1])
+            return 0;
+    return 1;
+}
+ 
+// To generate permutation of the array
+void 
+shuffle (long a[], long n)
+{
+    for (long i = 0; i < n; i++)
+        swap(&a[i], &a[rand() % n]);
+}
+ 
+/*BogoSort also known as permutation sort, stupid sort, slow sort, shotgun sort or monkey sort is a particularly ineffective algorithm one person can ever imagine. It is based on generate and test paradigm. The algorithm successively generates permutations of its input until it finds one that is sorted.(Wiki) For example, if bogosort is used to sort a deck of cards, it would consist of checking if the deck were in order, and if it were not, one would throw the deck into the air, pick the cards up at random, and repeat the process until the deck is sorted.
+Time Complexity: O(?) (since this algorithm has no upper bound)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+bogoSort (long a[], long n)
+{
+    // if array is not sorted then shuffle
+    // the array again
+    while (!isSorted(a, n))
+        shuffle(a, n);
+
+    return 1;
+}
+
+/*Gnome Sort also called Stupid sort is based on the concept of a Garden Gnome sorting his flower pots. A garden gnome sorts the flower pots by the following method:  
+He looks at the flower pot next to him and the previous one; if they are in the right order he steps one pot forward, otherwise he swaps them and steps one pot backwards.
+If there is no previous pot (he is at the starting of the pot line), he steps forwards; if there is no pot next to him (he is at the end of the pot line), he is done.
+Time Complexity: O(n^2)
+Average time to sort 100,000 numbers: ?
+*/
+int 
+gnomeSort (long arr[], long n) 
+{ 
+    long index = 0; 
+  
+    while (index < n) { 
+        if (index == 0) 
+            index++; 
+        if (arr[index] >= arr[index - 1]) 
+            index++; 
+        else { 
+            swap(&arr[index], &arr[index - 1]); 
+            index--; 
+        } 
+    } 
+    return 1; 
+} 

@@ -40,4 +40,28 @@ shellSort (long arr[], long n);
 int 
 timSort (long arr[], long n);
 
+int 
+combSort (long a[], long n);
+
+int 
+pigeonholeSort (long arr[], long n);
+
+int 
+cycleSort(long arr[], long n);
+
+int 
+cocktailSort (long a[], long n);
+
+int 
+bitonicSort (long a[],long low, long cnt, long dir);
+
+int 
+pancakeSort (long arr[], long n);
+
+int 
+bogoSort (long a[], long n);
+
+int 
+gnomeSort (long arr[], long n);
+
 #endif //__MY_SORT_H
