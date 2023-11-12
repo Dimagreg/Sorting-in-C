@@ -36,6 +36,8 @@ To build the project use:
 ```c
 mySort -g original.txt  original_shuf.txt 10000
 ```
+*The maximum amount of numbers that can be genereted is restricted to 80% of available memory*
+
 *Shuffling uses an algorithm to make sure <1% of numbers are consective*
 
 **Sort the shuffled file using Insertion Sort**
@@ -58,7 +60,7 @@ To modify STATS/DEBUG values consult **/main.c**
 
 ![image](https://github.com/Dimagreg/Sorting-in-C/assets/73190746/119f61e8-021b-4382-a99c-f59689cfe0bb)
 
-*NOTE! It becomes innacurate as you increase the number of integers to be sorted*
+*NOTE! It becomes innacurate as you increase the amount of numbers to be sorted*
 
 ## Contributing
 
