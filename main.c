@@ -1,36 +1,3 @@
-/*
- * TODO: 
-         add more sorting algorithms
-
- *       calculate estimate time of computing
-
-         add help2man instead of my_print.c
-
-         add test if a file has sorted numbers
- 
- *       parallel sorting:
- *       basically for 500 random values in a file separate it to 1..10 parallel processes
- *       where for example if chooses 5 it will create 5 different arrays of equal interval of
- *       values - each array is a struct that contains: array of elements, count, int_min, int_max,
- *       order. int_min and int_max will be subjected for each array. Ideally we will have 100
- *       elements per array. If not we will neglect if the number is between 60..120. If it is more
- *       then we will create 2 more arrays of equal intervals of int_min and int_max. If it is less,
- *       then compress 2 into one. If the number of elements is 0 - delete array. After that
- *       compress all the arrays into one respecting the order of intervals.
- */
-
-/*
- *  Utility program for generating/sorting a file of unsorted unsigned integers
- *   --help
- *   -v
- *   -g, --generate <filename_original> <filename_shuffled> <line_count>
- *              filename_original and filename_shuffled - non_space string 1....128
- *              line_count - 2....2,147,483,647 (max long value)
- *
- *   -s, --sort <file_shuffled> <filename_result>
- *          file_shuffled and filename_result - non_space string 1....128
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +18,7 @@ enum
 };
 
 /* Program version. */
-char *VERSION = "20-Jul-23";
+char *VERSION = "12-Nov-23";
 
 /* Array of unsorted input file numbers. */
 long *file_numbers_array = NULL;
@@ -344,13 +311,11 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
     if (DEBUG)
         printf ("DEBUG: Sorting using %s...\n", sorting_function_name);
 
-    /* Estimate time for sorting */ //TODO: dynamic estimation
-
     if (STATS)
     {
         printf ("STATS: Estimating time for sorting %ld numbers...\n", file_numbers_array_count);
 
-        double time_estimated = my_get_estimated_time_sort(insertionSort,
+        double time_estimated = my_get_estimated_time_sort(sorting_function_name,
                                                            file_numbers_array,
                                                            file_numbers_array_count);
 
@@ -555,7 +520,6 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
 
         return 0;
     }
-    /*TODO: FINISH*/
 
     clock_t timeEnd = clock ();
 
@@ -564,7 +528,7 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
         printf ("STATS: Time needed for sorting: %.2f s\n", (float) (timeEnd - timeStart) / CLOCKS_PER_SEC);
     }
 
-    /* Access to file_sorted. */ //TODO: check if file_sorted exists before sorting
+    /* Access to file_sorted. */
 
     if (DEBUG)
     {
