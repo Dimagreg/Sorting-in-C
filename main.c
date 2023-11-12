@@ -47,7 +47,7 @@
 enum
 {
     DEBUG = 0,
-    STATS = 0
+    STATS = 1
 };
 
 /* Program version. */
@@ -346,9 +346,9 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
 
     /* Estimate time for sorting */ //TODO: dynamic estimation
 
-    if (DEBUG)
+    if (STATS)
     {
-        printf ("DEBUG: Estimating time for sorting %ld numbers...\n", file_numbers_array_count);
+        printf ("STATS: Estimating time for sorting %ld numbers...\n", file_numbers_array_count);
 
         double time_estimated = my_get_estimated_time_sort(insertionSort,
                                                            file_numbers_array,
@@ -361,7 +361,7 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
             return 0;
         }
 
-        printf ("DEBUG: Time estimated for sorting: %.2f s\n", time_estimated);
+        printf ("STATS: Time estimated for sorting: %.2f s\n", time_estimated);
     }
 
     /* Sort */
@@ -477,6 +477,78 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
             return 0;
         }
     }
+    else if (strcmp (sorting_function_name, "combSort") == 0)
+    {
+        if (combSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on combSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "pingeonholeSort") == 0)
+    {
+        if (pigeonholeSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on pingeonholeSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "cycleSort") == 0)
+    {
+        if (cycleSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on cycleSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "cocktailSort") == 0)
+    {
+        if (cocktailSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on cocktailSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "bitonicSort") == 0)
+    {
+        if (bitonicSort (file_numbers_array, 0, file_numbers_array_count, 1) == 0)
+        {
+            my_print_error ("Error on bitonicSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "pancakeSort") == 0)
+    {
+        if (pancakeSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on pancakeSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "bogoSort") == 0)
+    {
+        if (bogoSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on bogoSort.", "");
+
+            return 0;
+        }
+    }
+    else if (strcmp (sorting_function_name, "gnomeSort") == 0)
+    {
+        if (gnomeSort (file_numbers_array, file_numbers_array_count) == 0)
+        {
+            my_print_error ("Error on gnomeSort.", "");
+
+            return 0;
+        }
+    }
     else
     {
         my_print_error ("Unknown command.\n", "");
@@ -487,9 +559,9 @@ char *file_sorted_path, long *file_numbers_array, long file_numbers_array_count)
 
     clock_t timeEnd = clock ();
 
-    if (DEBUG)
+    if (STATS)
     {
-        printf ("DEBUG: Time needed for sorting: %.2f s\n", (float) (timeEnd - timeStart) / CLOCKS_PER_SEC);
+        printf ("STATS: Time needed for sorting: %.2f s\n", (float) (timeEnd - timeStart) / CLOCKS_PER_SEC);
     }
 
     /* Access to file_sorted. */ //TODO: check if file_sorted exists before sorting
@@ -713,6 +785,70 @@ main (int argc, char* argv[])
         else if (strcmp (argv[2], "tim") == 0)
         {
             if (my_sort_file ("timSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "comb") == 0)
+        {
+            if (my_sort_file ("combSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "pigeonhole") == 0)
+        {
+            if (my_sort_file ("pigeonholeSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "cycle") == 0)
+        {
+            if (my_sort_file ("cycleSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "cocktail") == 0)
+        {
+            if (my_sort_file ("cocktailSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "bitonic") == 0)
+        {
+            if (my_sort_file ("bitonicSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "pancake") == 0)
+        {
+            if (my_sort_file ("pancakeSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "bogo") == 0)
+        {
+            if (my_sort_file ("bogoSort", argv[3], argv[4], file_numbers_array, 
+                            file_numbers_array_count) == 0)
+            {
+                my_exit (-1);
+            }
+        }
+        else if (strcmp (argv[2], "gnome") == 0)
+        {
+            if (my_sort_file ("gnomeSort", argv[3], argv[4], file_numbers_array, 
                             file_numbers_array_count) == 0)
             {
                 my_exit (-1);
