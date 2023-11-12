@@ -53,12 +53,13 @@ dkms.conf
 
 # Idea Files
 .idea
+.vscode
 
 # Temporary Files
 *.txt
 
-# Ignore all
-*
+# Test Files
+mySort
 
-# Unignore Man Page
-!*.1.gz
+# Tmp Directory
+/tmp
