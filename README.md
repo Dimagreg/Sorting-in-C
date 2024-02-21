@@ -21,7 +21,6 @@ Sorting in C is a simple utility program for sorting numbers written entirely in
 18. Bingo Sort
 19. Gnome Sort
     
-*Resulting in total of 20 sorting algorithms*
 
 ## Installation
 
